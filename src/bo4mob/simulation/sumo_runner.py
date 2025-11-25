@@ -61,11 +61,12 @@ def simulate_od(
     timeout : int, optional
         Timeout for waiting on trip file creation (seconds). Defaults to 300.
     """
-    base_dir = Path(base_dir)
 
     # Prepare paths
     trip_output_before = f"{prefix_output}_{trips_xml_out_str[:-4]}_beforeRteUpdates.xml"
+    trip_output_before_path = Path(trip_output_before)
     trip_output_after = f"{prefix_output}_{trips_xml_out_str}"
+    trip_output_after_path = Path(trip_output_after)
 
     # Step 1: Generate trips using od2trips
     od2trips_cmd = [
@@ -88,14 +89,14 @@ def simulate_od(
     # Step 2: Wait for trips file to be created
     print(f"Waiting for trip file to be generated: {trip_output_before}")
     start_time = time.time()
-    while not trip_output_before.exists():
+    while not trip_output_before_path.exists():
         if time.time() - start_time > timeout:
             raise TimeoutError(f"Timeout: Trip file not created within {timeout} seconds: {trip_output_before}")
         time.sleep(0.5)
     print(f"Trip file ready after {time.time() - start_time:.2f} seconds.")
 
     # Step 3: Fix trips with predefined route information
-    update_trip_routes(trip_output_before, trip_output_after, routes_df, routes_per_od)
+    update_trip_routes(trip_output_before_path, trip_output_after_path, routes_df, routes_per_od)
 
     # Step 4: Run SUMO simulation
     sumo_cmd = [
