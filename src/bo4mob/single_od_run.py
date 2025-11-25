@@ -5,6 +5,7 @@ import pprint
 import subprocess
 import sys
 import warnings
+from importlib.resources import files
 from pathlib import Path
 
 # Third-party imports
@@ -28,19 +29,6 @@ warnings.filterwarnings("ignore", category=BadInitialCandidatesWarning)
 # SUMO Environment Setup
 # =====================
 
-# Set SUMO installation path (edit this according to your OS/environment)
-default_sumo_paths = [
-    "/opt/sumo-1.12/share/sumo",  # Linux
-    "C:/Program Files (x86)/Eclipse/Sumo",  # Windows
-]
-
-sumo_home = os.environ.get("SUMO_HOME")
-if not sumo_home:
-    sumo_home = next((p for p in default_sumo_paths if os.path.exists(p)), None)
-    if not sumo_home:
-        sys.exit("SUMO_HOME is not set and no default path exists.")
-    os.environ["SUMO_HOME"] = sumo_home
-
 os.environ["LIBSUMO_AS_TRACI"] = "1"  # Optional: faster simulation
 
 # Add SUMO tools to Python path
@@ -49,22 +37,6 @@ if os.path.exists(tools_path):
     sys.path.append(tools_path)
 else:
     sys.exit(f"Cannot find SUMO tools at {tools_path}")
-
-
-# =====================
-# Set Project Base Path
-# =====================
-
-project_root = Path(__file__).resolve().parent.parent
-base_path = str(project_root)
-
-# Check for whitespace in path (SUMO limitation)
-if " " in base_path:
-    raise ValueError("base_path should not contain spaces. SUMO does not support whitespace in paths.")
-
-# Set working directory
-os.chdir(project_root)
-
 
 # =====================
 # Main Function
@@ -77,7 +49,7 @@ def main():
 
     This function handles:
     - Parsing command-line arguments including network, time, and OD input
-    - Loading simulation configuration, OD matrices, route data, and sensor data
+    - Loading simulation configuration, OD matrices, route data, and sensor data from within the package
     - Running one simulation with the provided OD input (from --od_values or --od_csv)
     - Saving simulation results, including output flows and evaluation plots
     - (Optionally) launching SUMO-GUI to visualize the simulation using --launch_gui
@@ -118,7 +90,7 @@ def main():
         "--od_csv",
         type=str,
         required=False,
-        help="Path to the OD CSV file. If not provided, the default path will be used.",
+        help="Path to an external OD CSV file. If not provided, the default path will be used.",
     )
     parser.add_argument(
         "--od_values",
@@ -144,34 +116,39 @@ def main():
     eval_measure = args.eval_measure
     routes_per_od = args.routes_per_od
 
+    # Get the root path of the installed package's data
+    package_root = files('bo4mob')
+
     # =====================
     # Load configuration
     # =====================
-    config = load_config_single_od_run(base_path, config_file_name=f"sim_setup_network_{args.network_name}.json")
+    # The config loader is now self-contained and does not need a base_path
+    config = load_config_single_od_run(config_file_name=f"sim_setup_network_{args.network_name}.json")
     pprint.pprint(dict(config))
 
     # =====================
-    # Load input data
+    # Load input data from within the package
     # =====================
 
-    # Load base OD matrix from XML
+    # Load base OD matrix from XML (path is correctly resolved inside the config loader)
     od_df_base = od_xml_to_df(config["od_xml"])
 
     # Number of OD pairs (rows in the OD matrix)
     dim_od = od_df_base.shape[0]
     print(f"Number of OD pairs: {dim_od}")
 
-    # Load precomputed route data from CSV
-    routes_csv = config["routes_csv"]
+    # Load precomputed route data from CSV (path is correctly resolved inside the config loader)
+    routes_csv_path = config["routes_csv"]
     if routes_per_od == 'single':
-        routes_csv = routes_csv.with_name("routes_single.csv")
+        routes_csv_path = routes_csv_path.with_name("routes_single.csv")
     elif routes_per_od == 'multiple':
-        routes_csv = routes_csv.with_name("routes_multiple.csv")
-    routes_df = pd.read_csv(routes_csv, index_col=0)
+        routes_csv_path = routes_csv_path.with_name("routes_multiple.csv")
+    routes_df = pd.read_csv(routes_csv_path, index_col=0)
 
-    # Load ground-truth sensor flow data
+    # Load ground-truth sensor flow data from the package's internal data
     true_sensor_file_name = f"gt_link_data_{network_name}_{date}_{hour}.csv"
-    sensor_measure_gt = pd.read_csv(base_path + f"/sensor_data/{date}/" + true_sensor_file_name)
+    sensor_data_path = package_root / 'sensor_data' / str(date) / true_sensor_file_name
+    sensor_measure_gt = pd.read_csv(sensor_data_path)
 
     # Extract the list of links where sensors are located
     link_selection = sensor_measure_gt["link_id"].tolist()
@@ -184,7 +161,7 @@ def main():
 
     # Set up run paths
     if args.od_csv:
-        od_file = args.od_csv
+        od_file = Path(args.od_csv).stem
     elif args.network_name == "1ramp" and args.od_values:
         od_file = "od_" + "-".join(map(str, args.od_values))
     else:
@@ -198,14 +175,14 @@ def main():
         print(f"Run already exists at {path_run_detail}. Exiting.")
     else:
         # =====================
-        # Load target OD values
+        # Load target OD values (from external file or command line)
         # =====================
         if args.od_csv:
-            od_file_path = os.path.join(base_path, f"od_for_single_run/{args.od_csv}")
-            if os.path.exists(od_file_path):
+            od_file_path = Path(args.od_csv) # Path is relative to the user's current directory
+            if od_file_path.exists():
                 od_df_target = pd.read_csv(od_file_path)
                 x = od_df_target["flow"].to_numpy()
-                print(f"Loaded target OD values with {len(x)} flows.")
+                print(f"Loaded target OD values with {len(x)} flows from {od_file_path}.")
             else:
                 raise FileNotFoundError(f"OD file not found: {od_file_path}")
         elif args.network_name == "1ramp" and args.od_values:
@@ -214,7 +191,7 @@ def main():
             x = args.od_values
             print(f"Using provided OD values for 1ramp: {x}")
         else:
-            raise ValueError("Either a valid OD CSV file must be provided or OD values must be specified for 1ramp.")
+            raise ValueError("Either --od_csv must be provided or --od_values must be specified for 1ramp.")
 
         # =====================
         # Run simulation
@@ -224,7 +201,7 @@ def main():
             x,
             od_df_base,
             config,
-            base_path,
+            package_root,  # Pass the package's root data path instead of the old base_path
             path_run_detail,
             path_run_simul,
             path_run_result,
@@ -252,10 +229,13 @@ def main():
         else:
             od_input = "od_" + "-".join(map(str, args.od_values)) + "_values"
 
+        # Locate the GUI runner script within the installed package
+        gui_script_path = package_root / 'visualization' / 'sumo_gui_runner.py'
+
         # Build command to launch SUMO GUI
         gui_cmd = [
             "python",
-            "visualization/sumo_gui_runner.py",
+            str(gui_script_path),  # Use the absolute path to the script
             "--mode",
             "single_od_run",
             "--network_name",
