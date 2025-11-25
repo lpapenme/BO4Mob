@@ -4,7 +4,7 @@ import os
 import pprint
 import sys
 import warnings
-from pathlib import Path
+from importlib.resources import files
 
 # Third-party imports
 import matplotlib
@@ -30,18 +30,6 @@ warnings.filterwarnings("ignore", category=BadInitialCandidatesWarning)
 # SUMO Environment Setup
 # =====================
 
-# Set SUMO installation path (edit this according to your OS/environment)
-default_sumo_paths = [
-    "/opt/sumo-1.12/share/sumo",  # Linux
-    "C:/Program Files (x86)/Eclipse/Sumo",  # Windows
-]
-
-sumo_home = os.environ.get("SUMO_HOME")
-if not sumo_home:
-    sumo_home = next((p for p in default_sumo_paths if os.path.exists(p)), None)
-    if not sumo_home:
-        sys.exit("SUMO_HOME is not set and no default path exists.")
-    os.environ["SUMO_HOME"] = sumo_home
 
 os.environ["LIBSUMO_AS_TRACI"] = "1"  # Optional: faster simulation
 
@@ -51,21 +39,6 @@ if os.path.exists(tools_path):
     sys.path.append(tools_path)
 else:
     sys.exit(f"Cannot find SUMO tools at {tools_path}")
-
-
-# =====================
-# Set Project Base Path
-# =====================
-
-project_root = Path(__file__).resolve().parent.parent.parent
-base_path = str(project_root)
-
-# Check for whitespace in path (SUMO limitation)
-if " " in base_path:
-    raise ValueError("base_path should not contain spaces. SUMO does not support whitespace in paths.")
-
-# Set working directory
-os.chdir(project_root)
 
 
 # =====================
@@ -146,8 +119,9 @@ def main():
     # =====================
     # Load configuration
     # =====================
+    # The config loader is now self-contained and no longer needs a base_path.
+    # It correctly finds its own data files using importlib.
     config = load_config_full_opt(
-        base_path,
         model_name=model_name,
         kernel=kernel,
         config_file_name=f"sim_setup_network_{args.network_name}.json",
@@ -155,27 +129,28 @@ def main():
     pprint.pprint(dict(config))
 
     # =====================
-    # Load input data
+    # Load input data from within the package
     # =====================
 
-    # Load base OD matrix from XML
+    # Load base OD matrix from XML (path is correctly resolved inside the config loader)
     od_df_base = od_xml_to_df(config["od_xml"])
 
     # Number of OD pairs (rows in the OD matrix)
     dim_od = od_df_base.shape[0]
     print(f"Number of OD pairs: {dim_od}")
 
-    # Load precomputed route data from CSV
-    routes_csv = config["routes_csv"]
+    # Load precomputed route data from CSV (path is correctly resolved inside the config loader)
+    routes_csv_path = config["routes_csv"]
     if routes_per_od == 'single':
-        routes_csv = routes_csv.with_name("routes_single.csv")
+        routes_csv_path = routes_csv_path.with_name("routes_single.csv")
     elif routes_per_od == 'multiple':
-        routes_csv = routes_csv.with_name("routes_multiple.csv")
-    routes_df = pd.read_csv(routes_csv, index_col=0)
+        routes_csv_path = routes_csv_path.with_name("routes_multiple.csv")
+    routes_df = pd.read_csv(routes_csv_path, index_col=0)
 
-    # Load ground-truth sensor measurements
+    # Load ground-truth sensor measurements from the package's internal data
     true_sensor_file_name = f"gt_link_data_{network_name}_{date}_{hour}.csv"
-    sensor_measure_gt = pd.read_csv(base_path + f"/sensor_data/{date}/" + true_sensor_file_name)
+    sensor_data_path = files('bo4mob') / 'sensor_data' / str(date) / true_sensor_file_name
+    sensor_measure_gt = pd.read_csv(sensor_data_path)
 
     # Extract the list of links where sensors are located
     link_selection = sensor_measure_gt["link_id"].tolist()
@@ -212,6 +187,7 @@ def main():
     # =====================
 
     # Run initial search procedure
+    # The `base_path` argument is removed as the function now relies on the paths in `config`.
     data_set_init_search = run_initial_search_procedure(
         config=config,
         model_name=model_name,
@@ -223,7 +199,6 @@ def main():
         n_init_search=n_init_search,
         cpu_max=cpu_max,
         od_df_base=od_df_base,
-        base_path=base_path,
         routes_df=routes_df,
         routes_per_od=routes_per_od,
         eval_measure=eval_measure,
@@ -237,6 +212,7 @@ def main():
 
     # Run optimization loop
     if model_name != "initSearch":
+        # The `base_path` argument is removed here as well.
         data_set_total, sensor_measure_simul = run_optimization_loop(
             config=config,
             model_name=model_name,
@@ -250,7 +226,6 @@ def main():
             cpu_max=cpu_max,
             data_set_init_search=data_set_init_search,
             od_df_base=od_df_base,
-            base_path=base_path,
             routes_df=routes_df,
             routes_per_od=routes_per_od,
             eval_measure=eval_measure,

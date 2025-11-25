@@ -11,7 +11,7 @@ from typing import Union
 import pandas as pd
 
 
-def load_config_full_opt(base_path: str, model_name: str, kernel: str, config_file_name: str) -> dict:
+def load_config_full_opt(model_name: str, kernel: str, config_file_name: str) -> dict:
     """
     Load and format full optimization simulation configuration into a flat dictionary.
     All data is loaded from within the package, making it self-contained.
@@ -86,7 +86,7 @@ def load_config_full_opt(base_path: str, model_name: str, kernel: str, config_fi
     return kwargs_config
 
 
-def load_config_single_od_run(base_path: str, config_file_name: str) -> dict:
+def load_config_single_od_run(config_file_name: str) -> dict:
     """
     Load and format single OD run simulation configuration into a flat dictionary.
     All data is loaded from within the package, making it self-contained.
