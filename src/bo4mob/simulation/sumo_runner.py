@@ -1,4 +1,5 @@
 # Standard library imports
+import os
 import subprocess
 import time
 import xml.etree.ElementTree as ET
@@ -17,7 +18,6 @@ from bo4mob.simulation.data_loader import xml2df_str_in_chunks
 def simulate_od(
     od_xml: Path,
     prefix_output: str,
-    base_dir: Path,
     net_xml: Path,
     taz_xml: Path,
     additional_xml: Path,
@@ -38,8 +38,6 @@ def simulate_od(
         Path to the OD XML file.
     prefix_output : str
         Prefix to use for all output files.
-    base_dir : Path
-        Base directory where network and simulation files are located.
     net_xml : Path
         Path to the SUMO network file.
     taz_xml : Path
@@ -97,6 +95,14 @@ def simulate_od(
 
     # Step 3: Fix trips with predefined route information
     update_trip_routes(trip_output_before_path, trip_output_after_path, routes_df, routes_per_od)
+
+    # copy additional.xml to output folder in current working directory to avoid path issues
+    additional_xml_output = os.path.join(os.getcwd(), "output", additional_xml.name)
+    if not os.path.exists(os.path.dirname(additional_xml_output)):
+        os.makedirs(os.path.dirname(additional_xml_output))
+    if not os.path.isfile(additional_xml_output):
+        subprocess.run(["cp", str(additional_xml), additional_xml_output])
+    additional_xml = Path(additional_xml_output)
 
     # Step 4: Run SUMO simulation
     sumo_cmd = [

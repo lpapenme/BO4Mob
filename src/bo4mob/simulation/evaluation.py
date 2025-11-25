@@ -102,7 +102,6 @@ def run_initial_evaluation(
     simulate_od(
         new_od_xml,
         prefix_output_simul,
-        base_path,
         config["net_xml"],
         config["taz_xml"],
         config["additional_xml"],
@@ -233,7 +232,6 @@ def run_sample_evaluation(
     simulate_od(
         new_od_xml,
         prefix_output_simul,
-        base_path,
         config["net_xml"],
         config["taz_xml"],
         config["additional_xml"],
@@ -349,7 +347,6 @@ def run_single_od_evaluation(
     simulate_od(
         new_od_xml,
         prefix_output_simul,
-        base_path,
         config["net_xml"],
         config["taz_xml"],
         config["additional_xml"],
