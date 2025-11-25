@@ -57,7 +57,7 @@ else:
 # Set Project Base Path
 # =====================
 
-project_root = Path(__file__).resolve().parent.parent
+project_root = Path(__file__).resolve().parent.parent.parent
 base_path = str(project_root)
 
 # Check for whitespace in path (SUMO limitation)

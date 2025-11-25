@@ -3,6 +3,7 @@ import json
 import multiprocessing as mp
 import os
 import xml.etree.ElementTree as ET
+from importlib.resources import files
 from pathlib import Path
 from typing import Union
 
@@ -11,9 +12,14 @@ import pandas as pd
 
 
 def load_config_full_opt(base_path: str, model_name: str, kernel: str, config_file_name: str) -> dict:
-    """Load and format full optimization simulation configuration into a flat dictionary."""
-    config_path = Path(base_path, "config")
-    sim_setup = json.load(open(config_path / config_file_name))
+    """
+    Load and format full optimization simulation configuration into a flat dictionary.
+    All data is loaded from within the package, making it self-contained.
+    """
+    # Use importlib.resources to find the config file within the installed package
+    config_path = files('bo4mob').joinpath('config') / config_file_name
+    with open(config_path, 'r') as f:
+        sim_setup = json.load(f)
 
     kwargs_config = {}
 
@@ -22,16 +28,18 @@ def load_config_full_opt(base_path: str, model_name: str, kernel: str, config_fi
     kwargs_config["model_name"] = model_name
     kwargs_config["kernel"] = kernel
 
-    # Paths to SUMO network-related files
-    kwargs_config["network_path"] = Path("network", sim_setup["network_name"])
-    kwargs_config["taz_xml"] = Path(base_path, kwargs_config["network_path"], "taz.xml")
-    kwargs_config["net_xml"] = Path(base_path, kwargs_config["network_path"], "net.xml")
-    kwargs_config["routes_csv"] = Path(base_path, kwargs_config["network_path"], "routes.csv")
-    kwargs_config["od_xml"] = Path(base_path, kwargs_config["network_path"], "od.xml")
-    kwargs_config["additional_xml"] = Path(base_path, kwargs_config["network_path"], "additional.xml")
-    kwargs_config["link_selection_txt"] = Path(base_path, kwargs_config["network_path"], "link_selection.txt")
+    # Paths to SUMO network-related files, located via importlib
+    # This ensures the package finds its own data files wherever it's installed.
+    network_data_path = files('bo4mob').joinpath('network', sim_setup["network_name"])
+    kwargs_config["network_path"] = network_data_path
+    kwargs_config["taz_xml"] = network_data_path / "taz.xml"
+    kwargs_config["net_xml"] = network_data_path / "net.xml"
+    kwargs_config["routes_csv"] = network_data_path / "routes.csv"
+    kwargs_config["od_xml"] = network_data_path / "od.xml"
+    kwargs_config["additional_xml"] = network_data_path / "additional.xml"
+    kwargs_config["link_selection_txt"] = network_data_path / "link_selection.txt"
 
-    # Output directory
+    # Output directory (relative to the current working directory, which is standard)
     if model_name == "initSearch":
         kwargs_config["path_opt"] = f"output/full_optimization/{kwargs_config['network_name']}_initSearch_"
     else:
@@ -44,10 +52,10 @@ def load_config_full_opt(base_path: str, model_name: str, kernel: str, config_fi
     kwargs_config["link_data_out_str"] = "edge_data.xml"
     kwargs_config["trips_xml_out_str"] = "trips.xml"
 
-    # Environment settings
+    # Environment settings (depends on user's system, not package data)
     kwargs_config["sumo_path"] = os.environ["SUMO_HOME"]
 
-    # Simulation time settings
+    # Simulation time settings from the config file
     kwargs_config["sim_start_time"] = sim_setup["sim_start_time"]
     kwargs_config["sim_end_time"] = sim_setup["sim_end_time"]
     kwargs_config["sim_stat_freq_sec"] = sim_setup["sim_stat_freq_sec"]
@@ -79,25 +87,31 @@ def load_config_full_opt(base_path: str, model_name: str, kernel: str, config_fi
 
 
 def load_config_single_od_run(base_path: str, config_file_name: str) -> dict:
-    """Load and format single OD run simulation configuration into a flat dictionary."""
-    config_path = Path(base_path, "config")
-    sim_setup = json.load(open(config_path / config_file_name))
+    """
+    Load and format single OD run simulation configuration into a flat dictionary.
+    All data is loaded from within the package, making it self-contained.
+    """
+    # Use importlib.resources to find the config file within the installed package
+    config_path = files('bo4mob').joinpath('config') / config_file_name
+    with open(config_path, 'r') as f:
+        sim_setup = json.load(f)
 
     kwargs_config = {}
 
     # Basic identifiers
     kwargs_config["network_name"] = sim_setup["network_name"]
 
-    # Paths to SUMO network-related files
-    kwargs_config["network_path"] = Path("network", sim_setup["network_name"])
-    kwargs_config["taz_xml"] = Path(base_path, kwargs_config["network_path"], "taz.xml")
-    kwargs_config["net_xml"] = Path(base_path, kwargs_config["network_path"], "net.xml")
-    kwargs_config["routes_csv"] = Path(base_path, kwargs_config["network_path"], "routes.csv")
-    kwargs_config["od_xml"] = Path(base_path, kwargs_config["network_path"], "od.xml")
-    kwargs_config["additional_xml"] = Path(base_path, kwargs_config["network_path"], "additional.xml")
-    kwargs_config["link_selection_txt"] = Path(base_path, kwargs_config["network_path"], "link_selection.txt")
+    # Paths to SUMO network-related files, located via importlib
+    network_data_path = files('bo4mob').joinpath('network', sim_setup["network_name"])
+    kwargs_config["network_path"] = network_data_path
+    kwargs_config["taz_xml"] = network_data_path / "taz.xml"
+    kwargs_config["net_xml"] = network_data_path / "net.xml"
+    kwargs_config["routes_csv"] = network_data_path / "routes.csv"
+    kwargs_config["od_xml"] = network_data_path / "od.xml"
+    kwargs_config["additional_xml"] = network_data_path / "additional.xml"
+    kwargs_config["link_selection_txt"] = network_data_path / "link_selection.txt"
 
-    # Output directory
+    # Output directory (relative to the current working directory)
     kwargs_config["path_run"] = f"output/single_od_run/{kwargs_config['network_name']}_"
 
     # Simulation output file names
