@@ -64,8 +64,8 @@ def simulate_od(
     base_dir = Path(base_dir)
 
     # Prepare paths
-    trip_output_before = base_dir / f"{prefix_output}_{trips_xml_out_str[:-4]}_beforeRteUpdates.xml"
-    trip_output_after = base_dir / f"{prefix_output}_{trips_xml_out_str}"
+    trip_output_before = f"{prefix_output}_{trips_xml_out_str[:-4]}_beforeRteUpdates.xml"
+    trip_output_after = f"{prefix_output}_{trips_xml_out_str}"
 
     # Step 1: Generate trips using od2trips
     od2trips_cmd = [
