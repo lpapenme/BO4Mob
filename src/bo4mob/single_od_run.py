@@ -201,7 +201,6 @@ def main():
             x,
             od_df_base,
             config,
-            package_root,  # Pass the package's root data path instead of the old base_path
             path_run_detail,
             path_run_simul,
             path_run_result,

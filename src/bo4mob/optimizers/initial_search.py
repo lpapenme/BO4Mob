@@ -123,7 +123,6 @@ def run_initial_search_procedure(
                             x,
                             base_od,
                             config,
-                            base_path,
                             lock,
                             ods_epsilon,
                             loss_all,

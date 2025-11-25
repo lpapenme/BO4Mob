@@ -9,7 +9,6 @@ import pandas as pd
 
 
 def parse_link_flow_xml_to_pandas(
-    base_dir: Path,
     sim_link_file: Path,
     prefix_output: str,
     sensor_start_time: float,
@@ -41,7 +40,7 @@ def parse_link_flow_xml_to_pandas(
         - Raw interval-level DataFrame
         - Path to the saved CSV file
     """
-    output_file = Path(base_dir) / f"{prefix_output}_link_measurements.csv"
+    output_file =  f"{prefix_output}_link_measurements.csv"
 
     root = ET.parse(sim_link_file).getroot()
     data = []

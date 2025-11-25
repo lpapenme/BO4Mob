@@ -17,7 +17,6 @@ def run_initial_evaluation(
     x,
     base_od,
     config,
-    base_path,
     lock,
     ods_epsilon,
     loss_all,
@@ -113,9 +112,8 @@ def run_initial_evaluation(
     run_time = time.time() - start_time
 
     # Load simulation output and compute loss
-    sim_link_out = f"{base_path}/{prefix_output_simul}_{config['link_data_out_str']}"
+    sim_link_out = f"{prefix_output_simul}_{config['link_data_out_str']}"
     curr_link_stats, _, _ = parse_link_flow_xml_to_pandas(
-        base_path,
         sim_link_out,
         prefix_output_simul,
         config["sensor_start_time"],
@@ -143,9 +141,8 @@ def run_initial_evaluation(
         trips_out = config["trips_xml_out_str"]
         try:
             os.remove(sim_link_out)
-            os.remove(f"{base_path}/{prefix_output_simul}_{trips_out[:-4]}_beforeRteUpdates.xml")
-            os.remove(f"{base_path}/{prefix_output_simul}_{trips_out}")
-            # os.remove(f"{base_path}/{prefix_output_simul}_routes.vehroutes.xml")
+            os.remove(f"{prefix_output_simul}_{trips_out[:-4]}_beforeRteUpdates.xml")
+            os.remove(f"{prefix_output_simul}_{trips_out}")
         except FileNotFoundError:
             print("[Warning] Some intermediate files were not found during cleanup.")
 
@@ -157,7 +154,6 @@ def run_sample_evaluation(
     config,
     base_od,
     path_opt_simul,
-    base_path,
     routes_df,
     routes_per_od,
     eval_measure,
@@ -243,9 +239,8 @@ def run_sample_evaluation(
     run_time = time.time() - start_time
 
     # Load simulation output and compute loss
-    sim_link_out = f"{base_path}/{prefix_output_simul}_{config['link_data_out_str']}"
+    sim_link_out = f"{prefix_output_simul}_{config['link_data_out_str']}"
     curr_link_stats, _, _ = parse_link_flow_xml_to_pandas(
-        base_path,
         sim_link_out,
         prefix_output_simul,
         config["sensor_start_time"],
@@ -265,8 +260,8 @@ def run_sample_evaluation(
         trips_out = config["trips_xml_out_str"]
         try:
             os.remove(sim_link_out)
-            os.remove(f"{base_path}/{prefix_output_simul}_{trips_out[:-4]}_beforeRteUpdates.xml")
-            os.remove(f"{base_path}/{prefix_output_simul}_{trips_out}")
+            os.remove(f"{prefix_output_simul}_{trips_out[:-4]}_beforeRteUpdates.xml")
+            os.remove(f"{prefix_output_simul}_{trips_out}")
             # os.remove(f"{base_path}/{prefix_output_simul}_routes.vehroutes.xml")  # for sumo gui visualization
         except FileNotFoundError:
             print("[Warning] Some intermediate files were not found during cleanup.")
@@ -278,7 +273,6 @@ def run_single_od_evaluation(
     x,
     base_od,
     config,
-    base_path,
     path_run_detail,
     path_run_simul,
     path_run_result,
@@ -366,9 +360,8 @@ def run_single_od_evaluation(
         f.write(run_time_str)
 
     # Load simulation output and compute loss
-    sim_link_out = f"{base_path}/{prefix_output_simul}_{config['link_data_out_str']}"
+    sim_link_out = f"{prefix_output_simul}_{config['link_data_out_str']}"
     curr_link_stats, _, _ = parse_link_flow_xml_to_pandas(
-        base_path,
         sim_link_out,
         prefix_output_simul,
         config["sensor_start_time"],
@@ -406,9 +399,8 @@ def run_single_od_evaluation(
         trips_out = config["trips_xml_out_str"]
         try:
             os.remove(sim_link_out)
-            os.remove(f"{base_path}/{prefix_output_simul}_{trips_out[:-4]}_beforeRteUpdates.xml")
-            os.remove(f"{base_path}/{prefix_output_simul}_{trips_out}")
-            # os.remove(f"{base_path}/{prefix_output_simul}_routes.vehroutes.xml")
+            os.remove(f"/{prefix_output_simul}_{trips_out[:-4]}_beforeRteUpdates.xml")
+            os.remove(f"/{prefix_output_simul}_{trips_out}")
         except FileNotFoundError:
             print("[Warning] Some intermediate files were not found during cleanup.")
 
