@@ -11,9 +11,9 @@ from botorch.utils.transforms import normalize
 from tqdm import trange
 
 # Local application imports
-from optimizers.strategy_registry import strategy_registery
-from simulation.evaluation import run_sample_evaluation
-from utils.misc import set_seed
+from bo4mob.optimizers.strategy_registry import strategy_registery
+from bo4mob.simulation.evaluation import run_sample_evaluation
+from bo4mob.utils.misc import set_seed
 
 
 def run_optimization_loop(

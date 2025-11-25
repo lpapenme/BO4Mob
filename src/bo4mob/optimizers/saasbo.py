@@ -5,10 +5,10 @@ from botorch.fit import fit_fully_bayesian_model_nuts
 from botorch.optim import optimize_acqf
 from botorch.utils.transforms import unnormalize
 
-from models.gp_models import initialize_model
+from bo4mob.models.gp_models import initialize_model
 
 # Local application imports
-from optimizers.base_strategy import BaseStrategy
+from bo4mob.optimizers.base_strategy import BaseStrategy
 
 
 def optimize_acqf_and_create_candidate(acq_func, bounds, device, dtype, batch_size, num_restarts, raw_samples):

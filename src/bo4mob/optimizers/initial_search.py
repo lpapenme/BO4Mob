@@ -9,8 +9,8 @@ import torch
 from botorch.utils.transforms import unnormalize
 
 # Local application imports
-from simulation.evaluation import run_initial_evaluation
-from utils.misc import set_seed
+from bo4mob.simulation.evaluation import run_initial_evaluation
+from bo4mob.utils.misc import set_seed
 
 
 def run_initial_search_procedure(

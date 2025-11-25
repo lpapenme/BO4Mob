@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 
 # Local application imports
-from simulation.sumo_runner import create_od_tazrelation_xml, simulate_od
-from utils.link_flow_analysis import compute_nrmse_all_links, parse_link_flow_xml_to_pandas
+from bo4mob.simulation.sumo_runner import create_od_tazrelation_xml, simulate_od
+from bo4mob.utils.link_flow_analysis import compute_nrmse_all_links, parse_link_flow_xml_to_pandas
 
 
 def run_initial_evaluation(

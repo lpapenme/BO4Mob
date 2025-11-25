@@ -13,5 +13,10 @@ dependencies = [
     "torch==2.6.0",
 ]
 
+
 [tool.setuptools.package-data]
 "bo4mob" = ["config/*", "network/**/*", "od_for_single_run/*", "sensor_data/**/*"]
+
+[build-system]
+requires = ["uv_build"]
+build-backend = "uv_build"

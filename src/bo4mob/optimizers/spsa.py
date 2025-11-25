@@ -7,8 +7,8 @@ import torch
 from botorch.utils.transforms import normalize, unnormalize
 
 # Local application imports
-from optimizers.base_strategy import BaseStrategy
-from simulation.evaluation import run_sample_evaluation
+from bo4mob.optimizers.base_strategy import BaseStrategy
+from bo4mob.simulation.evaluation import run_sample_evaluation
 
 
 def spsa_update(d, a=0.2, c=0.1, A=10, alpha=0.602, gamma=0.101, k=0):

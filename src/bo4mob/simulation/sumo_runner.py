@@ -9,8 +9,9 @@ from xml.dom import minidom
 import numpy as np
 import pandas as pd
 
+
 # Local application imports
-from simulation.data_loader import xml2df_str_in_chunks
+from bo4mob.simulation.data_loader import xml2df_str_in_chunks
 
 
 def simulate_od(

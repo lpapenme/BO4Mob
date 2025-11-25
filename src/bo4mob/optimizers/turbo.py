@@ -16,10 +16,10 @@ from gpytorch.settings import max_cholesky_size
 from gpytorch.utils.errors import NotPSDError
 from torch.quasirandom import SobolEngine
 
-from models.gp_models import initialize_model
+from bo4mob.models.gp_models import initialize_model
 
 # Local application imports
-from optimizers.base_strategy import BaseStrategy
+from bo4mob.optimizers.base_strategy import BaseStrategy
 
 
 @dataclass

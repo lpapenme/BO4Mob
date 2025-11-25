@@ -14,12 +14,12 @@ import torch
 from botorch.exceptions import BadInitialCandidatesWarning
 
 # Local application imports
-from optimizers.initial_search import run_initial_search_procedure
-from optimizers.optimization_loop import run_optimization_loop
-from simulation.data_loader import load_config_full_opt, od_xml_to_df
-from utils.params import get_params
-from utils.path_utils import prepare_run_paths
-from utils.plot_utils import save_convergence_plot, save_fit_to_gt_plots
+from bo4mob.optimizers.initial_search import run_initial_search_procedure
+from bo4mob.optimizers.optimization_loop import run_optimization_loop
+from bo4mob.simulation.data_loader import load_config_full_opt, od_xml_to_df
+from bo4mob.utils.params import get_params
+from bo4mob.utils.path_utils import prepare_run_paths
+from bo4mob.utils.plot_utils import save_convergence_plot, save_fit_to_gt_plots
 
 matplotlib.use("Agg")
 plt.ioff()

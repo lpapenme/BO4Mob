@@ -10,10 +10,10 @@ from gpytorch.mlls import ExactMarginalLogLikelihood
 from gpytorch.settings import max_cholesky_size
 from gpytorch.utils.errors import NotPSDError
 
-from models.gp_models import initialize_model
+from bo4mob.models.gp_models import initialize_model
 
 # Local application imports
-from optimizers.base_strategy import BaseStrategy
+from bo4mob.optimizers.base_strategy import BaseStrategy
 
 
 def optimize_acqf_and_create_candidate(acq_func, bounds, device, dtype, batch_size, num_restarts, raw_samples):

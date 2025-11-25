@@ -14,10 +14,10 @@ import pandas as pd
 from botorch.exceptions import BadInitialCandidatesWarning
 
 # Local application imports
-from simulation.data_loader import load_config_single_od_run, od_xml_to_df
-from simulation.evaluation import run_single_od_evaluation
-from utils.path_utils import prepare_run_paths
-from utils.plot_utils import save_fit_to_gt_plots_single_run
+from bo4mob.simulation.data_loader import load_config_single_od_run, od_xml_to_df
+from bo4mob.simulation.evaluation import run_single_od_evaluation
+from bo4mob.utils.path_utils import prepare_run_paths
+from bo4mob.utils.plot_utils import save_fit_to_gt_plots_single_run
 
 matplotlib.use("Agg")
 plt.ioff()
