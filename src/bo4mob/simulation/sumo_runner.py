@@ -97,7 +97,7 @@ def simulate_od(
     update_trip_routes(trip_output_before_path, trip_output_after_path, routes_df, routes_per_od)
 
     # copy additional.xml to output folder in current working directory to avoid path issues
-    additional_xml_output = os.path.join(os.getcwd(), "output", additional_xml.name)
+    additional_xml_output = os.path.join(os.getcwd(), additional_xml.name)
     if not os.path.exists(os.path.dirname(additional_xml_output)):
         os.makedirs(os.path.dirname(additional_xml_output))
     if not os.path.isfile(additional_xml_output):
