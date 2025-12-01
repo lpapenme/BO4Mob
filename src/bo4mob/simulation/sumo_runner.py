@@ -10,24 +10,23 @@ from xml.dom import minidom
 import numpy as np
 import pandas as pd
 
-
 # Local application imports
 from bo4mob.simulation.data_loader import xml2df_str_in_chunks
 
 
 def simulate_od(
-    od_xml: Path,
-    prefix_output: str,
-    net_xml: Path,
-    taz_xml: Path,
-    additional_xml: Path,
-    routes_df: pd.DataFrame,
-    routes_per_od: str,
-    sim_end_time: int,
-    trips_xml_out_str: str,
-    sim_start_time: int = 0,
-    seed: int = 0,
-    timeout: int = 300,
+        od_xml: Path,
+        prefix_output: str,
+        net_xml: Path,
+        taz_xml: Path,
+        additional_xml: Path,
+        routes_df: pd.DataFrame,
+        routes_per_od: str,
+        sim_end_time: int,
+        trips_xml_out_str: str,
+        sim_start_time: int = 0,
+        seed: int = 0,
+        timeout: int = 300,
 ) -> None:
     """
     Run a full SUMO simulation: generate trips from OD matrix, fix routes, and simulate.
@@ -97,7 +96,7 @@ def simulate_od(
     update_trip_routes(trip_output_before_path, trip_output_after_path, routes_df, routes_per_od)
 
     # copy additional.xml to output folder in current working directory to avoid path issues
-    additional_xml_output = os.path.join(os.getcwd(), additional_xml.name)
+    additional_xml_output = os.path.join(os.getcwd(), "output", additional_xml.name)
     if not os.path.exists(os.path.dirname(additional_xml_output)):
         os.makedirs(os.path.dirname(additional_xml_output))
     if not os.path.isfile(additional_xml_output):
@@ -157,6 +156,7 @@ def write_trips_to_xml_pretty(trips_df: pd.DataFrame, output_file: Path, attr_co
     attr_cols : list of str
         List of column names to include as attributes in each <trip> element.
     """
+
     def clean_val(x):
         try:
             return str(x)
@@ -182,7 +182,7 @@ def write_trips_to_xml_pretty(trips_df: pd.DataFrame, output_file: Path, attr_co
 
 
 def update_trip_routes(
-    input_trip_file: Path, output_trip_file: Path, routes_df: pd.DataFrame, routes_per_od: str
+        input_trip_file: Path, output_trip_file: Path, routes_df: pd.DataFrame, routes_per_od: str
 ) -> None:
     """
     Update the trips XML file to align start and end edges with a given route set.
@@ -248,7 +248,7 @@ def update_trip_routes(
             if not matching_routes.empty:
                 # Normalize the ratio to sum to 1
                 matching_routes['ratio'] = matching_routes['ratio'] / matching_routes['ratio'].sum()
-                
+
                 # Assign start_edge and last_edge to trips_df based on the ratio using random selection
                 probabilities = matching_routes['ratio'].values
                 selected_routes = np.random.choice(matching_routes.index, size=len(group), p=probabilities)
